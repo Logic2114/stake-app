@@ -1,6 +1,6 @@
 using System;
 
-namespace StakeApp.Models
+namespace StakeApp.Web.Models
 {
     public class ErrorViewModel
     {
