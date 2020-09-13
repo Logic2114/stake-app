@@ -4,7 +4,7 @@ using StakeApp.Data.Entities;
 
 namespace StakeApp.Data.DatabaseContexts.AuthenticationDbContext
 {
-    class AuthenticationDbContext : IdentityDbContext<ApplicationUser>
+    public class AuthenticationDbContext : IdentityDbContext<ApplicationUser>
     {
         public AuthenticationDbContext(DbContextOptions<AuthenticationDbContext> options)
             : base(options)
