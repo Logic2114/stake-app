@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using StakeApp.Data.DatabaseContexts.AuthenticationDbContext;
+using StakeApp.Data.DatabaseContexts.ApplicationDbContext;
 
 namespace StakeApp.Web
 {
@@ -21,7 +22,20 @@ namespace StakeApp.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContextPool<AuthenticationDbContext>(
-                options => options.UseSqlServer(Configuration.GetConnectionString("AuthenticationConnection")));
+                options => options.UseSqlServer(Configuration.GetConnectionString("AuthenticationConnection"),
+                sqlServerOptions => {
+                    sqlServerOptions.MigrationsAssembly("StakeApp.Data");
+                }
+            ));
+
+            services.AddDbContextPool<ApplicationDbContext>(options =>
+            options.UseSqlServer(Configuration.GetConnectionString("ApplicationDb"),
+
+            sqlServerOptions => {
+                sqlServerOptions.MigrationsAssembly("StakeApp.Data");
+                }
+            ));
+
             services.AddControllersWithViews();
         }
 
