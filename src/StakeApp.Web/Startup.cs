@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using StakeApp.Data.DatabaseContexts.AuthenticationDbContext;
 using StakeApp.Data.DatabaseContexts.ApplicationDbContext;
+using StakeApp.Data.Entities;
+using Microsoft.AspNetCore.Identity;
+using System.Threading.Tasks;
 
 namespace StakeApp.Web
 {
@@ -27,7 +31,7 @@ namespace StakeApp.Web
                 sqlServerOptions => {
                     sqlServerOptions.MigrationsAssembly("StakeApp.Data");
                 }
-                
+
             ));
 
             services.AddDbContextPool<ApplicationDbContext>(options =>
@@ -38,11 +42,26 @@ namespace StakeApp.Web
                 }
             ));
 
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+            .AddEntityFrameworkStores<AuthenticationDbContext>()
+            .AddDefaultTokenProviders();
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 6;
+                options.Password.RequireLowercase= false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.SignIn.RequireConfirmedEmail = false;
+                options.SignIn.RequireConfirmedPhoneNumber = false;
+            });
+
             services.AddControllersWithViews();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider svp)
         {
             if (env.IsDevelopment())
             {
@@ -67,6 +86,51 @@ namespace StakeApp.Web
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            MigrationDatabaseContexts(svp);
+            CreateDefaultRolesAndUsers(svp).GetAwaiter().GetResult();
+        }
+
+        public void MigrationDatabaseContexts(IServiceProvider svp)
+        {
+            var AuthenticationDbContext = svp.GetRequiredService<AuthenticationDbContext>();
+            AuthenticationDbContext.Database.Migrate();
+
+            var ApplicationDbContext = svp.GetRequiredService<ApplicationDbContext>();
+            ApplicationDbContext.Database.Migrate();
+        }
+        public async Task CreateDefaultRolesAndUsers(IServiceProvider svp)
+        {
+            string[] roles = new string[] { "SystemAdministrator", "User" };
+            var userEmail = "admin@stakeapp.com";
+            var userPassword = "superSecretPassword@2020";
+
+            var roleManager = svp.GetRequiredService<RoleManager<IdentityRole>>();
+            foreach (var role in roles)
+            {
+                var roleExists = await roleManager.RoleExistsAsync(role);
+                if(!roleExists)
+                {
+                    await roleManager.CreateAsync(new IdentityRole{ Name = role });
+                }         
+            }
+
+            var userManager = svp.GetRequiredService<UserManager<ApplicationUser>>();
+            var User = await userManager.FindByEmailAsync(userEmail);
+            if(userEmail is null)
+            {
+                var user = new ApplicationUser
+                {
+                    Email = userEmail,
+                    UserName = userEmail,
+                    EmailConfirmed = true,
+                    PhoneNumber = "+2348122750698",
+                    PhoneNumberConfirmed = true
+                };
+
+                await userManager.CreateAsync(user, userPassword);
+                await userManager.AddToRolesAsync(user, roles);
+            }
         }
     }
 }
