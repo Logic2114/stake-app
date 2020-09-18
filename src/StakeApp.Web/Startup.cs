@@ -23,13 +23,15 @@ namespace StakeApp.Web
         {
             services.AddDbContextPool<AuthenticationDbContext>(
                 options => options.UseSqlServer(Configuration.GetConnectionString("AuthenticationConnection"),
+
                 sqlServerOptions => {
                     sqlServerOptions.MigrationsAssembly("StakeApp.Data");
                 }
+                
             ));
 
             services.AddDbContextPool<ApplicationDbContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("ApplicationDb"),
+                options.UseSqlServer(Configuration.GetConnectionString("ApplicationConnection"),
 
             sqlServerOptions => {
                 sqlServerOptions.MigrationsAssembly("StakeApp.Data");
