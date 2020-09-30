@@ -10,6 +10,8 @@ using StakeApp.Data.DatabaseContexts.ApplicationDbContext;
 using StakeApp.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
+using StakeApp.Web.Interfaces;
+using StakeApp.Web.Services;
 
 namespace StakeApp.Web
 {
@@ -58,6 +60,7 @@ namespace StakeApp.Web
             });
 
             services.AddControllersWithViews();
+            services.AddTransient<IAccountsService, AccountsService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -78,6 +81,7 @@ namespace StakeApp.Web
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
