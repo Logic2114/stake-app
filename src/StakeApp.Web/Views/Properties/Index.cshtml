@@ -1,1 +1,14 @@
+@model IEnumerable<StakeApp.Data.Entities.Property>
 <h1>Property Page</h1>
+
+@if(Model is object)
+{
+  @foreach (var property in Model)
+  {
+    <h3>@property.Title</h3>
+    <hr/>
+    <p>property.Price</p>
+    <p>@property.Address</p>
+    <p>@property.ContactPhoneNumber</p>
+  }
+}

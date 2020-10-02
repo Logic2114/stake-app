@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using StakeApp.Data.DatabaseContexts.ApplicationDbContext;
 using StakeApp.Data.Entities;
@@ -13,6 +14,12 @@ namespace StakeApp.Web.Services
         public PropertyService(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
+        }
+
+        public  IEnumerable<Property> GetAllProperties()
+        {
+            return _dbContext.Properties;
+            // we need to return a list of properties.
         }
         public async Task AddProperty(PropertyModel model)
         {
