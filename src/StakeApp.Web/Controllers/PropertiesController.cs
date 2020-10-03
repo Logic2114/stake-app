@@ -1,11 +1,13 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StakeApp.Web.Interfaces;
 using StakeApp.Web.Models;
 
 namespace StakeApp.Web.Controllers
 {
+    [Authorize]
     public class PropertiesController : Controller
     {
         private readonly IPropertyService _propertyService; 
@@ -13,6 +15,7 @@ namespace StakeApp.Web.Controllers
         {
             _propertyService = propertyService;
         }
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Index()
         {
@@ -20,11 +23,11 @@ namespace StakeApp.Web.Controllers
             return View(properties);
         }
         [HttpGet]
-
         public IActionResult Add()
         {
             return View();
         }
+        [HttpPost]
         public async Task<IActionResult> Add(PropertyModel model)
         {
             try
